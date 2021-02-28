@@ -17,12 +17,14 @@ class MightyThingsEncoder {
         // beginning. they are ordered from the center to the edge.
         this.startBits = [4, 44, 24, 4];
         
-        this.inputStrings = ["DARE", "MIGHTY", "THINGS hel300lo 3D 42", "34 11 58 N 118 10 31 W"];
+        this.letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        this.inputStrings = ["DARE", "MIGHTY", "THINGS", "34 11 58 N 118 10 31 W"];
         this.outputStrings = [];
     }
     
     tokenize(inString) {       
-        // turn each string into an array of characters or numbers, ignoring spaces
+        // turn each string into an array of characters or numbers, ignoring
+        // spaces. if a number is < 128, return a number; otherwise characters.
         const words = inString.split(" ");
         
         const charArray = words.map(w => {
@@ -35,7 +37,7 @@ class MightyThingsEncoder {
                         return num;
                     }
                     else {
-                        return d.split("");
+                        throw "Number is greater than available bit width. Numbers must be 0--127.";
                     }
                 }
                 else {
@@ -44,9 +46,35 @@ class MightyThingsEncoder {
             });
         });
                 
-        console.log(charArray.flat(2));
+        return charArray.flat(2);
+    }
+    
+    binEncoder(token) {
+        let numVal;
+        if(typeof(token) == "string") {
+            numVal = this.letters.indexOf(token) + 1;
+            if(numVal < 0) {
+                throw "Letters must be capital letters A--Z.";
+            }
+        }
+        else {
+            numVal = token;
+        }
+        const binVal = numVal.toString(2).split("");
+        
+        while(binVal.length < 7) {
+            binVal.splice(0, 0, "0");
+        }
+        
+        return binVal;
+    }
+    
+    encode(inString) {
+        const tokens = this.tokenize(inString);
+        return tokens.map(t => this.binEncoder(t));
     }
 }
 
 const encoder = new MightyThingsEncoder();
-encoder.tokenize(encoder.inputStrings[3]);
+
+console.log(encoder.encode(encoder.inputStrings[3]));
