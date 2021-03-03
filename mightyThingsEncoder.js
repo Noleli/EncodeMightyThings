@@ -45,14 +45,14 @@ class ChuteVisualizer {
         // arbitrary decision: the inner edge of the stitching is on the
         // innerRadius, and the outer edge pokes outside of it.
         
-        // even bits stitch outward going clockwise.
+        // odd bits stitch outward going clockwise.
         
         const startAngle = this.angle(bitIndex);
         const endAngle = this.angle(bitIndex + 1);
         
         // define the four corner points as [angle, radius]
         const corners = [];
-        if(bitIndex % 2) {
+        if(bitIndex % 2 == 0) {
             corners[0] = [startAngle, innerRadius];
             corners[1] = [startAngle, outerRadius];
             
