@@ -200,7 +200,8 @@ class ChuteVisualizer {
     }
     
     size() {
-        const containerContainerStyle = getComputedStyle(this.container.node().parentNode);
+        this.svg.attr("width", 0).attr("height", 0);
+        const containerContainerStyle = getComputedStyle(this.container.node());
         const availableWidth = parseFloat(containerContainerStyle.getPropertyValue("width"))
             - parseFloat(containerContainerStyle.getPropertyValue("padding-left"))
             - parseFloat(containerContainerStyle.getPropertyValue("padding-right"));
