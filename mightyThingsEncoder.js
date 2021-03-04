@@ -6,8 +6,20 @@ class ChuteVisualizer {
         this.parachute = this.radialContainer.append("g");
         this.margin = 2;
         
+        // not doing this in CSS so it's a legit exportable SVG
+        this.colors = {
+            dataTrue: "#D24A4C",
+            dataFalse: "#FFFFFF",
+            preWordPadding: "#555555",
+            interBytePadding: "#AAAAAA",
+            postWordPadding: "#555555",
+            postDataPadding: "#A83B3D"
+        };
+        
         this.angle = d3.scaleLinear()
             .range([0, 2 * Math.PI]);
+        
+        this.explain = true;
         
         this.size();
         this.update(); // probably in the constructor for debug only
@@ -15,7 +27,7 @@ class ChuteVisualizer {
     
     update() {
         this.angle
-            .domain([0, data[0].length]); // in case the number of bits changed
+            .domain([0, data[0].length]); // in case the number of bits changed (although there's no UI for that)
         
         const rings = this.parachute.selectAll("g.ring").data(data);
         rings.join("g")
@@ -26,8 +38,20 @@ class ChuteVisualizer {
                     .join("path")
                         .attr("class", "segment")
                         .attr("d", (b, bitIndex) => this.makeArc(bitIndex, rowIndex))
-                        .attr("stroke", "#000000")
-                        .attr("fill", d => d ? "#d24a4c" : "#ffffff");
+                        .attr("stroke", "#333333")
+                        .attr("fill", d => {
+                            if(this.explain) {
+                                if(d.role == "data") {
+                                    return d.value ? this.colors.dataTrue : this.colors.dataFalse;
+                                }
+                                else {
+                                    return this.colors[d.role];
+                                }
+                            }
+                            else {
+                                return d.value ? this.colors.dataTrue : this.colors.dataFalse;
+                            }
+                        });
             });
     }
     
@@ -134,8 +158,8 @@ class MightyThingsEncoder {
         this.totalBits = 80;
         
         this.interByteGap = 3;
-        this.interByteChar = "0";
-        this.padChar = "1";
+        this.interByteVal = false;
+        this.padVal = true;
         
         // there are 4 rows of bits. each one has some amount of padding at the
         // beginning. they are ordered from the center to the edge.
@@ -217,32 +241,58 @@ class MightyThingsEncoder {
             this.inputString = inputString;
         }
         
-        const encoded = this.encode(this.inputString);
+        let encoded = this.encode(this.inputString);
+        encoded = encoded.map((encodedToken, byteIndex) => {
+            return encodedToken.split("").map((bit, bitIndex) => {
+                return {
+                    byte: byteIndex,
+                    bit: bitIndex,
+                    role: "data",
+                    token: this.tokens[byteIndex],
+                    value: bit === "1"
+                }
+            });
+        });
         
         // pad between each byte
-        let padded = encoded.join(this.interByteChar.repeat(this.interByteGap));
-        
+        for(let i = 1; encoded.length < 2 * encoder.tokens.length - 1; i += 2) {
+            encoded.splice(i, 0, Array(this.interByteGap).fill({
+                role: "interBytePadding",
+                value: this.interByteVal
+            }));
+        }
+
         // pad before all bytes
-        padded = this.interByteChar.repeat(this.interByteGap) + padded;
+        encoded.unshift(Array(this.interByteGap).fill({
+            role: "preWordPadding",
+            value: this.interByteVal
+        }));
         
         // pad after all bytes (if there's room)
         if(this.tokens.length < 8) {
-            padded = padded + this.interByteChar.repeat(this.interByteGap);
+            encoded.push(Array(this.interByteGap).fill({
+                role: "postWordPadding",
+                value: this.interByteVal
+            }));
         }
+        
+        encoded = encoded.flat();
         
         // pad the end until there are 80 bits
-        while(padded.length < 80) {
-            padded += this.padChar;
-        }
+        encoded.push(...Array(this.totalBits - encoded.length).fill({
+            role: "postDataPadding",
+            value: this.padVal
+        }));
+       
         
         // rotate the array so it starts on the right place based on the row
-        padded = padded.split("").map((v, i, ar) => {
+        encoded = encoded.map((v, i, ar) => {
             let shiftedIndex = (i - this.startBits[row]) % ar.length;
             shiftedIndex += shiftedIndex < 0 ? ar.length : 0;
             return ar[shiftedIndex];
         });
         
-        return padded.map(d => d === "1");
+        return encoded;
     }
 }
 
