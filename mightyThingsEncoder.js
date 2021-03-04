@@ -4,7 +4,11 @@ class ChuteVisualizer {
         this.svg = this.container.append("svg");
         this.radialContainer = this.svg.append("g");
         this.parachute = this.radialContainer.append("g");
+        this.explanatory = this.radialContainer.append("g");
         this.margin = 2;
+        
+        // inner and outer radius of each ring as a proportion of the total radius
+        this.ringProportions = [[0.09, 0.37], [0.37, 0.63], [0.63, 0.80], [0.90, 1]];
         
         // not doing this in CSS so it's a legit exportable SVG
         this.colors = {
@@ -19,7 +23,7 @@ class ChuteVisualizer {
         this.angle = d3.scaleLinear()
             .range([0, 2 * Math.PI]);
         
-        this.explain = true;
+        this.explain = false;
         
         this.size();
         this.update(); // probably in the constructor for debug only
@@ -34,37 +38,61 @@ class ChuteVisualizer {
             .attr("class", "ring")
             .each((rowData, rowIndex, rowG) => {
                 const row = d3.select(rowG[rowIndex]);
-                row.selectAll("path.segment").data(d => d)
-                    .join("path")
-                        .attr("class", "segment")
-                        .attr("d", (b, bitIndex) => this.makeArc(bitIndex, rowIndex))
-                        .attr("stroke", "#333333")
-                        .attr("fill", d => {
-                            if(this.explain) {
-                                if(d.role == "data") {
-                                    return d.value ? this.colors.dataTrue : this.colors.dataFalse;
-                                }
-                                else {
-                                    return this.colors[d.role];
-                                }
-                            }
-                            else {
+                let bits = row.selectAll("g.bit").data(d => d);
+                
+                const bitsEnter = bits.enter().append("g").attr("class", "bit");
+                bitsEnter.append("path").attr("class", "bitPath");
+                bits = bits.merge(bitsEnter);
+                
+                bits.select("path.bitPath")
+                    .attr("d", (b, bitIndex) => this.makePath(bitIndex, rowIndex))
+                    .attr("stroke", "#111111")
+                    .attr("stroke-width", this.radius/600)
+                    .attr("fill", d => {
+                        if(this.explain) {
+                            if(d.role == "data") {
                                 return d.value ? this.colors.dataTrue : this.colors.dataFalse;
                             }
-                        });
+                            else {
+                                return this.colors[d.role];
+                            }
+                        }
+                        else {
+                            return d.value ? this.colors.dataTrue : this.colors.dataFalse;
+                        }
+                    });
             });
+            
+        const explanatoryRings = this.explanatory.selectAll("g.ring").data(data);
+        explanatoryRings.join("g").attr("class", "ring").each((rowData, rowIndex, rowG) => {
+            const row = d3.select(rowG[rowIndex]);
+            let bits = row.selectAll("g.bit").data(d => d);
+            
+            const bitsEnter = bits.enter().append("g").attr("class", "bit");
+            bitsEnter.append("text").attr("class", "token");
+            bits = bits.merge(bitsEnter);
+            
+            bits.select("text.token")
+                .text(d => d.bit === 3 && this.explain ? d.token : "")
+                .attr("font-family", "Helvetica, sans-serif")
+                .attr("font-weight", "bold")
+                .attr("font-size", this.radius/12)
+                .attr("stroke", "#FFFFFF")
+                .attr("stroke-width", this.radius/300)
+                .attr("x", (d, bitIndex) => this.center(bitIndex, rowIndex)[0])
+                .attr("y", (d, bitIndex) => this.center(bitIndex, rowIndex)[1])
+                .attr("dx", (d, i, n) => -n[i].getBBox().width/2)
+                .attr("dy", this.radius/12 * .4);
+        });
     }
     
-    makeArc(bitIndex, rowIndex) {
-        // inner and outer radius of each ring as a proportion of the total radius
-        const ringProportions = [[0.09, 0.37], [0.37, 0.63], [0.63, 0.80], [0.90, 1]];
-        
+    makePath(bitIndex, rowIndex) {
         // whether or not the inner and outer edges of the rings have angled stitching
         const stitched = [[false, true], [true, true], [true, false], [false, false]];
         const stitchDepth = 0.04; // proportion of radius
         
-        const innerRadius = this.radius * ringProportions[rowIndex][0];
-        const outerRadius = this.radius * ringProportions[rowIndex][1];
+        const innerRadius = this.radius * this.ringProportions[rowIndex][0];
+        const outerRadius = this.radius * this.ringProportions[rowIndex][1];
         
         // arbitrary decision: the inner edge of the stitching is on the
         // innerRadius, and the outer edge pokes outside of it.
@@ -135,6 +163,18 @@ class ChuteVisualizer {
         }
         
         return pathData;
+    }
+    
+    center(bitIndex, rowIndex) {
+        const startAngle = this.angle(bitIndex);
+        const endAngle = this.angle(bitIndex + 1);
+        const avgAngle = (startAngle + endAngle)/2;
+        
+        const innerRadius = this.radius * this.ringProportions[rowIndex][0];
+        const outerRadius = this.radius * this.ringProportions[rowIndex][1];
+        const avgRadius = (innerRadius + outerRadius)/2;
+        
+        return d3.pointRadial(avgAngle, avgRadius);
     }
     
     size() {
