@@ -201,6 +201,9 @@ class UIControls {
     constructor(containerSelector) {
         this.container = d3.select(containerSelector);
         
+        this.container.html(`<label><input id="explainToggle" type="checkbox"> Explain</label>
+            <div class="textboxContainer"></div>`);
+        
         this.explainCheckbox = this.container.select("#explainToggle")
             .on("change", e => {
                 const checked = e.currentTarget.checked;
