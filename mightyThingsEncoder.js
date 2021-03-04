@@ -18,7 +18,7 @@ class ChuteVisualizer {
             preWordPadding: "#555555",
             interBytePadding: "#CCCCCC",
             postWordPadding: "#555555",
-            postDataPadding: "#A83B3D"
+            postDataPadding: "#882a2c"
         };
         
         this.angle = d3.scaleLinear()
