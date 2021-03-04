@@ -25,7 +25,11 @@ class ChuteVisualizer {
             .range([0, 2 * Math.PI]);
                 
         this.size();
-        // this.update(); // probably in the constructor for debug only
+        
+        d3.select(window).on("resize.vis", () => {
+            this.size();
+            this.update();
+        });
     }
     
     updateData() {
@@ -196,7 +200,13 @@ class ChuteVisualizer {
     }
     
     size() {
-        this.outerRadius = 300;
+        const containerContainerStyle = getComputedStyle(this.container.node().parentNode);
+        const availableWidth = parseFloat(containerContainerStyle.getPropertyValue("width"))
+            - parseFloat(containerContainerStyle.getPropertyValue("padding-left"))
+            - parseFloat(containerContainerStyle.getPropertyValue("padding-right"));
+        const availableHeight = document.documentElement.clientHeight - 20;
+        
+        this.outerRadius = Math.min(availableWidth, availableHeight)/2;
         this.radius = this.outerRadius - this.margin;
         
         this.svg
@@ -215,8 +225,10 @@ class UIControls {
     constructor(containerSelector) {
         this.container = d3.select(containerSelector);
         
-        this.container.html(`<label><input id="explainToggle" type="checkbox"> Explain</label>
-            <div class="textboxContainer"></div>`);
+        this.textboxNames = ["Inner ring", "Ring 2", "Ring 3", "Outer ring"];
+        
+        this.container.html(`<div class="textboxContainer"></div>
+            <div class="form-check"><label><input id="explainToggle" type="checkbox" class="form-check-input"> Explain</label></div>`);
         
         this.explainCheckbox = this.container.select("#explainToggle")
             .on("change", e => {
@@ -233,20 +245,20 @@ class UIControls {
         this.explainCheckbox.property("checked", explain);
         
         let textboxes = this.textboxContainer.selectAll("div.textbox").data(strings);
-        const textboxesEnter = textboxes.enter().append("div").attr("class", "textbox");
-        textboxesEnter.append("label")
-            .attr("for", (d, i) => "textbox" + i)
-            .text((d, i) => "Textbox " + i); // todo
-        textboxesEnter.append("input")
-            .attr("id", (d, i) => "texbox" + i)
-            .attr("data-index", (d, i) => i) // to be able to get it in event callbacks
-            .on("input", (e, d) => {
-                let newString = e.target.value.toUpperCase();
-                strings[e.currentTarget.dataset.index] = newString;
-                this.update();
-                vis.updateData();
-            });
+        const textboxesEnter = textboxes.enter().append("div").attr("class", "textbox")
+            .html((d, i) => `<div class="mb-3">
+                                <label for="textbox${i}" class="form-label">${this.textboxNames[i]}</label>
+                                <input class="form-control" id="textbox${i}" placeholder="${strings[i]}" data-index="${i}">
+                            </div>`);
+            
+        textboxesEnter.select("input").on("input", (e, d) => {
+            let newString = e.target.value.toUpperCase();
+            strings[e.currentTarget.dataset.index] = newString;
+            this.update();
+            vis.updateData();
+        });
         textboxes = textboxes.merge(textboxesEnter);
+        
         textboxes.select("input")
             .property("value", d => d);
     }
@@ -403,8 +415,8 @@ const strings = ["DARE", "MIGHTY", "THINGS", "34 11 58 N 118 10 31 W"];
 let explain = false;
 
 function init() {
-    vis.updateData();
     ui.update();
+    vis.size();
+    vis.updateData();
 }
 init();
-
