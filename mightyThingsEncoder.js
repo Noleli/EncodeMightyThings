@@ -16,7 +16,7 @@ class ChuteVisualizer {
             dataTrue: "#D24A4C",
             dataFalse: "#FFFFFF",
             preWordPadding: "#555555",
-            interBytePadding: "#AAAAAA",
+            interBytePadding: "#CCCCCC",
             postWordPadding: "#555555",
             postDataPadding: "#A83B3D"
         };
@@ -50,7 +50,21 @@ class ChuteVisualizer {
                 
                 bits.select("path.bitPath")
                     .attr("d", (b, bitIndex) => this.makePath(bitIndex, rowIndex))
-                    .attr("stroke", "#111111")
+                    .attr("stroke", d => {
+                        const normalColor = "#111111";
+                        // const nonDataColor = "none";
+                        if(explain) {
+                            if(d.role == "data") {
+                                return normalColor;
+                            }
+                            else {
+                                return this.colors[d.role];
+                            }
+                        }
+                        else {
+                            return normalColor;
+                        }
+                    })
                     .attr("stroke-width", this.radius/600)
                     .attr("fill", d => {
                         if(explain) {
@@ -80,13 +94,13 @@ class ChuteVisualizer {
                 .text(d => d.bit === 3 && explain ? d.token : "")
                 .attr("font-family", "Helvetica, sans-serif")
                 .attr("font-weight", "bold")
-                .attr("font-size", this.radius/12)
+                .attr("font-size", this.radius/8)
                 .attr("stroke", "#FFFFFF")
-                .attr("stroke-width", this.radius/300)
+                .attr("stroke-width", this.radius/200)
                 .attr("x", (d, bitIndex) => this.center(bitIndex, rowIndex)[0])
                 .attr("y", (d, bitIndex) => this.center(bitIndex, rowIndex)[1])
                 .attr("dx", (d, i, n) => -n[i].getBBox().width/2)
-                .attr("dy", this.radius/12 * .4);
+                .attr("dy", this.radius/8 * .4);
         });
     }
     
