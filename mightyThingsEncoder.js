@@ -375,13 +375,15 @@ class MightyThingsEncoder {
         }
 
         // pad before all bytes
-        encoded.unshift(Array(this.interByteGap).fill({
-            role: "preWordPadding",
-            value: this.interByteVal
-        }));
+        if(this.tokens.length > 0) {
+            encoded.unshift(Array(this.interByteGap).fill({
+                role: "preWordPadding",
+                value: this.interByteVal
+            }));
+        }
         
         // pad after all bytes (if there's room)
-        if(this.tokens.length < 8) {
+        if(this.tokens.length < 8 && this.tokens.length > 0) {
             encoded.push(Array(this.interByteGap).fill({
                 role: "postWordPadding",
                 value: this.interByteVal
