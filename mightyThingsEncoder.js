@@ -1,6 +1,7 @@
 class ChuteVisualizer {
     constructor(containerSelector) {
         this.container = d3.select(containerSelector);
+        
         this.svg = this.container.append("svg");
         this.radialContainer = this.svg.append("g");
         this.parachute = this.radialContainer.append("g");
@@ -22,18 +23,21 @@ class ChuteVisualizer {
         
         this.angle = d3.scaleLinear()
             .range([0, 2 * Math.PI]);
-        
-        this.explain = false;
-        
+                
         this.size();
-        this.update(); // probably in the constructor for debug only
+        // this.update(); // probably in the constructor for debug only
+    }
+    
+    updateData() {
+        this.data = strings.map((s, i) => encoder.encodePadded(i, s));
+        this.update();
     }
     
     update() {
         this.angle
-            .domain([0, data[0].length]); // in case the number of bits changed (although there's no UI for that)
+            .domain([0, this.data[0].length]); // in case the number of bits changed (although there's no UI for that)
         
-        const rings = this.parachute.selectAll("g.ring").data(data);
+        const rings = this.parachute.selectAll("g.ring").data(this.data);
         rings.join("g")
             .attr("class", "ring")
             .each((rowData, rowIndex, rowG) => {
@@ -49,7 +53,7 @@ class ChuteVisualizer {
                     .attr("stroke", "#111111")
                     .attr("stroke-width", this.radius/600)
                     .attr("fill", d => {
-                        if(this.explain) {
+                        if(explain) {
                             if(d.role == "data") {
                                 return d.value ? this.colors.dataTrue : this.colors.dataFalse;
                             }
@@ -63,7 +67,7 @@ class ChuteVisualizer {
                     });
             });
             
-        const explanatoryRings = this.explanatory.selectAll("g.ring").data(data);
+        const explanatoryRings = this.explanatory.selectAll("g.ring").data(this.data);
         explanatoryRings.join("g").attr("class", "ring").each((rowData, rowIndex, rowG) => {
             const row = d3.select(rowG[rowIndex]);
             let bits = row.selectAll("g.bit").data(d => d);
@@ -73,7 +77,7 @@ class ChuteVisualizer {
             bits = bits.merge(bitsEnter);
             
             bits.select("text.token")
-                .text(d => d.bit === 3 && this.explain ? d.token : "")
+                .text(d => d.bit === 3 && explain ? d.token : "")
                 .attr("font-family", "Helvetica, sans-serif")
                 .attr("font-weight", "bold")
                 .attr("font-size", this.radius/12)
@@ -190,6 +194,44 @@ class ChuteVisualizer {
         
         
         
+    }
+}
+
+class UIControls {
+    constructor(containerSelector) {
+        this.container = d3.select(containerSelector);
+        
+        this.explainCheckbox = this.container.select("#explainToggle")
+            .on("change", e => {
+                const checked = e.currentTarget.checked;
+                explain = checked;
+                this.update();
+                vis.update();
+            });
+        
+        this.textboxContainer = this.container.select(".textboxContainer");
+    }
+    
+    update() {
+        this.explainCheckbox.property("checked", explain);
+        
+        let textboxes = this.textboxContainer.selectAll("div.textbox").data(strings);
+        const textboxesEnter = textboxes.enter().append("div").attr("class", "textbox");
+        textboxesEnter.append("label")
+            .attr("for", (d, i) => "textbox" + i)
+            .text((d, i) => "Textbox " + i); // todo
+        textboxesEnter.append("input")
+            .attr("id", (d, i) => "texbox" + i)
+            .attr("data-index", (d, i) => i) // to be able to get it in event callbacks
+            .on("input", (e, d) => {
+                let newString = e.target.value.toUpperCase();
+                strings[e.currentTarget.dataset.index] = newString;
+                this.update();
+                vis.updateData();
+            });
+        textboxes = textboxes.merge(textboxesEnter);
+        textboxes.select("input")
+            .property("value", d => d);
     }
 }
 
@@ -336,10 +378,16 @@ class MightyThingsEncoder {
     }
 }
 
-const strings = ["DARE", "MIGHTY", "THINGS", "34 11 58 N 118 10 31 W"];
 const encoder = new MightyThingsEncoder();
-const data = strings.map((s, i) => encoder.encodePadded(i, s));
 const vis = new ChuteVisualizer("#chuteContainer");
+const ui = new UIControls("#uiControls");
 
-console.log(data);
+const strings = ["DARE", "MIGHTY", "THINGS", "34 11 58 N 118 10 31 W"];
+let explain = false;
+
+function init() {
+    vis.updateData();
+    ui.update();
+}
+init();
 
