@@ -26,9 +26,24 @@ class ChuteVisualizer {
                 
         this.size();
         
+        this.windowWidth = 0;
+        this.windowHeight = 0;
         d3.select(window).on("resize.vis", () => {
-            this.size();
-            this.update();
+            // there's a mobile safari bug that fires resize events when scrolling,
+            // so manually track the window size. https://stackoverflow.com/a/29940941
+            const newWidth = document.documentElement.clientWidth;
+            const newHeight = document.documentElement.clientHeight
+            if(this.windowWidth !== newWidth || this.windowHeight != newHeight) {
+                // catching a special case for rotating devices that have width 768.
+                // gotta run it twice. kinda janky, but here we are. I think it
+                // has to do with scrollbars.
+                if(newWidth <= 768 && this.windowWidth > 768 || newWidth == 768) {
+                    this.size();
+                    this.update();
+                }
+                this.size();
+                this.update();
+            }
         });
     }
     
@@ -200,13 +215,16 @@ class ChuteVisualizer {
     }
     
     size() {
-        this.svg.attr("width", 0).attr("height", 0);
+        this.svg.attr("width", 0);
         const containerContainerStyle = getComputedStyle(this.container.node());
         const availableWidth = parseFloat(containerContainerStyle.getPropertyValue("width"))
             - parseFloat(containerContainerStyle.getPropertyValue("padding-left"))
             - parseFloat(containerContainerStyle.getPropertyValue("padding-right"));
-        const availableHeight = document.documentElement.clientHeight - 20;
         
+        this.windowWidth = document.documentElement.clientWidth;
+        this.windowHeight = document.documentElement.clientHeight;
+        const availableHeight = this.windowHeight - 20;
+                
         this.outerRadius = Math.min(availableWidth, availableHeight)/2;
         this.radius = this.outerRadius - this.margin;
         
