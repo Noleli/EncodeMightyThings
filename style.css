@@ -8,11 +8,9 @@ body {
     column-gap: 16px;
     
     grid-template-columns: 8fr 4fr;
-    grid-template-rows: auto 1fr auto auto;
+    grid-template-rows: auto auto;
     grid-template-areas:
-        "chute header"
-        "chute uiControls"
-        "chute legend"
+        "chute sidebar"
         "footer footer";
     
     --dataTrue: #D24A4C;
@@ -21,6 +19,11 @@ body {
     --interBytePadding: #CCCCCC;
     --postWordPadding: #555555;
     --postDataPadding: #882a2c;
+}
+
+#sidebar {
+    display: flex;
+    flex-direction: column;
 }
 
 #legend {
@@ -40,6 +43,10 @@ body {
             "footer";
         grid-row-gap: 16px;
         row-gap: 16px;
+    }
+    
+    #sidebar {
+        display: contents;
     }
     
     #legend {
