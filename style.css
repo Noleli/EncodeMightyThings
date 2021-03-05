@@ -1,5 +1,6 @@
 body {
     padding-top: 16px;
+    background-color: #c2c5dd;
 }
 
 #appContainer {
@@ -13,7 +14,7 @@ body {
         "chute sidebar"
         "footer footer";
     
-    --dataTrue: #D24A4C;
+    --dataTrue: #d98855;
     --dataFalse: #FFFFFF;
     --preWordPadding: #555555;
     --interBytePadding: #CCCCCC;
