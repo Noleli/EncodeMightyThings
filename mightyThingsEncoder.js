@@ -256,6 +256,7 @@ class UIControls {
                 const checked = e.currentTarget.checked;
                 explain = checked;
                 this.update();
+                vis.size(); // presence of scrollbar may change
                 vis.update();
             });
         

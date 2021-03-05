@@ -43,8 +43,8 @@ body {
     }
     
     #legend {
-        /* flex-direction: row;
-        flex-wrap: wrap; */
+        flex-direction: row;
+        flex-wrap: wrap;
         /* display: grid; */
         /* grid-auto-columns: minmax(min-content, max-content); */
         /* grid-auto-flow: column;
