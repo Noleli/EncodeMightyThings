@@ -9,6 +9,17 @@
         <link rel="apple-touch-icon" href="/favicon180.png">
         <link rel="manifest" href="/manifest.webmanifest">
         
+        <meta property="og:url"                content="https://projects.noahliebman.net/encodemightythings/">
+        <meta property="og:title"              content="Encode Mighty Things">
+        <meta property="og:description"        content="Make your own Perseverance rover parachute message!">
+        <meta property="og:image"              content="https://projects.noahliebman.net/encodemightythings/screenshot.png">
+        
+        <meta name="twitter:card" content="summary">
+        <meta name="twitter:site" content="@Noleli">
+        <meta name="twitter:title" content="Encode Mighty Things">
+        <meta name="twitter:description" content="Make your own Perseverance rover parachute message!">
+        <meta name="twitter:image" content="https://projects.noahliebman.net/encodemightythings/screenshot.png">
+        
         <title>Encode Mighty Things</title>
         <link href="//assets.noahliebman.net/bootstrap5/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
         <link href="style.css" rel="stylesheet" type="text/css">
@@ -56,5 +67,23 @@
             </div>
         </div>
         <script src="mightyThingsEncoder.js"></script>
+        
+        
+        <!-- Matomo -->
+        <script type="text/javascript">
+          var _paq = window._paq = window._paq || [];
+          /* tracker methods like "setCustomDimension" should be called before "trackPageView" */
+          _paq.push(['trackPageView']);
+          _paq.push(['enableLinkTracking']);
+          _paq.push(['enableHeartBeatTimer']);
+          (function() {
+            var u="//assets.noahliebman.net/piwik/";
+            _paq.push(['setTrackerUrl', u+'matomo.php']);
+            _paq.push(['setSiteId', '6']);
+            var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
+            g.type='text/javascript'; g.async=true; g.src=u+'matomo.js'; s.parentNode.insertBefore(g,s);
+          })();
+        </script>
+        <!-- End Matomo Code -->
     </body>    
 </html>
