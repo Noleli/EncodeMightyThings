@@ -8,11 +8,25 @@ body {
     column-gap: 16px;
     
     grid-template-columns: 8fr 4fr;
-    grid-template-rows: auto 1fr auto;
+    grid-template-rows: auto 1fr auto auto;
     grid-template-areas:
         "chute header"
         "chute uiControls"
+        "chute legend"
         "footer footer";
+    
+    --dataTrue: #D24A4C;
+    --dataFalse: #FFFFFF;
+    --preWordPadding: #555555;
+    --interBytePadding: #CCCCCC;
+    --postWordPadding: #555555;
+    --postDataPadding: #882a2c;
+}
+
+#legend {
+    grid-area: legend;
+    display: flex;
+    flex-direction: column;
 }
 
 @media (max-width: 768px) {
@@ -21,8 +35,20 @@ body {
         grid-template-areas:
             "header"
             "chute"
+            "legend"
             "uiControls"
             "footer";
+        grid-row-gap: 16px;
+        row-gap: 16px;
+    }
+    
+    #legend {
+        /* flex-direction: row;
+        flex-wrap: wrap; */
+        /* display: grid; */
+        /* grid-auto-columns: minmax(min-content, max-content); */
+        /* grid-auto-flow: column;
+        max-width: 100%; */
     }
 }
 
@@ -40,7 +66,44 @@ body {
     grid-area: uiControls;
 }
 
+#legend .legendItem {
+    display: flex;
+    align-items: center;
+    margin-bottom: 4px;
+    margin-right: 16px;
+}
+#legend .legendItem:last-child {
+    margin-right: 0;
+}
+
+#legend .itemName {
+    white-space: nowrap;
+}
+
+.colorSwatch {
+    width: 32px;
+    height: 18px;
+    border: 1px solid #CCCCCC;
+    margin-right: 6px;
+}
+
+.colorSwatch.dataTrue {
+    background-color: var(--dataTrue);
+}
+.colorSwatch.dataFalse {
+    background-color: var(--dataFalse);
+}
+.colorSwatch.preWordPadding {
+    background-color: var(--preWordPadding);
+}
+.colorSwatch.interBytePadding {
+    background-color: var(--interBytePadding);
+}
+.colorSwatch.postDataPadding {
+    background-color: var(--postDataPadding);
+}
+
 #footer {
     grid-area: footer;
-    margin-top: 16px;
+    /* margin-top: 16px; */
 }

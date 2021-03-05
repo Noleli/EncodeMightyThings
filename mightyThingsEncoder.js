@@ -13,12 +13,12 @@ class ChuteVisualizer {
         
         // not doing this in CSS so it's a legit exportable SVG
         this.colors = {
-            dataTrue: "#D24A4C",
-            dataFalse: "#FFFFFF",
-            preWordPadding: "#555555",
-            interBytePadding: "#CCCCCC",
-            postWordPadding: "#555555",
-            postDataPadding: "#882a2c"
+            dataTrue: this.container.style("--dataTrue"),
+            dataFalse: this.container.style("--dataFalse"),
+            preWordPadding: this.container.style("--preWordPadding"),
+            interBytePadding: this.container.style("--interBytePadding"),
+            postWordPadding: this.container.style("--postWordPadding"),
+            postDataPadding: this.container.style("--postDataPadding")
         };
         
         this.angle = d3.scaleLinear()
@@ -249,6 +249,8 @@ class UIControls {
         this.container.html(`<div class="textboxContainer"></div>
             <div class="form-check"><label><input id="explainToggle" type="checkbox" class="form-check-input"> Explain</label></div>`);
         
+        this.legend = d3.select("#legend");
+        
         this.explainCheckbox = this.container.select("#explainToggle")
             .on("change", e => {
                 const checked = e.currentTarget.checked;
@@ -262,6 +264,8 @@ class UIControls {
     
     update() {
         this.explainCheckbox.property("checked", explain);
+        
+        this.legend.style("display", explain ? null : "none");
         
         let textboxes = this.textboxContainer.selectAll("div.textbox").data(strings);
         const textboxesEnter = textboxes.enter().append("div").attr("class", "textbox")
