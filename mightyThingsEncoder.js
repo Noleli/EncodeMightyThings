@@ -273,13 +273,31 @@ class UIControls {
             .html((d, i) => `<div class="mb-3">
                                 <label for="textbox${i}" class="form-label">${this.textboxNames[i]}</label>
                                 <input class="form-control" id="textbox${i}" placeholder="${strings[i]}" data-index="${i}">
+                                <div class="invalid-feedback"></div>
                             </div>`);
             
         textboxesEnter.select("input").on("input", (e, d) => {
-            let newString = e.target.value.toUpperCase();
-            strings[e.currentTarget.dataset.index] = newString;
-            this.update();
-            vis.updateData();
+            let newString = e.currentTarget.value.toUpperCase();
+            e.currentTarget.value = newString; // capitalize even if invalid
+            
+            let valid = true;
+            try {
+                encoder.tokenize(newString);
+            }
+            catch(er) {
+                valid = false;
+                d3.select(e.currentTarget.parentNode).select(".invalid-feedback")
+                    .text(er)
+                    .style("display", "block");
+            }
+            d3.select(e.currentTarget).classed("is-invalid", !valid);
+            if(valid) {
+                strings[e.currentTarget.dataset.index] = newString;
+                d3.select(e.currentTarget.parentNode).select(".invalid-feedback")
+                    .style("display", null);
+                this.update();
+                vis.updateData();
+            }
         });
         textboxes = textboxes.merge(textboxesEnter);
         
@@ -323,18 +341,24 @@ class MightyThingsEncoder {
                         return num;
                     }
                     else {
-                        throw "Number is greater than available bit width. Numbers must be 0--127.";
+                        throw "Numbers must be between 0 and 127";
                     }
                 }
                 else {
-                    return d.split("");
+                    const letters = d.split("");
+                    letters.forEach(l => {
+                        if(this.letters.indexOf(l) + 1 < 1) {
+                            throw "Letters must be capital letters A–Z.";
+                        }
+                    });
+                    return letters;
                 }
             });
         });
                 
         const tokens = charArray.flat(2);
         if(tokens.length > 8) {
-            throw "Word must be 8 tokens or fewer.";
+            throw "A ring can’t hold that much data";
         }
         else {
             this.tokens = tokens;
@@ -347,9 +371,6 @@ class MightyThingsEncoder {
         let numVal;
         if(typeof(token) == "string") {
             numVal = this.letters.indexOf(token) + 1;
-            if(numVal < 1) {
-                throw "Letters must be capital letters A--Z.";
-            }
         }
         else {
             numVal = token;
