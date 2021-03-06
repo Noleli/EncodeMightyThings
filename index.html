@@ -24,6 +24,8 @@
         <link href="//assets.noahliebman.net/bootstrap5/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
         <link href="style.css" rel="stylesheet" type="text/css">
         <script src="//assets.noahliebman.net/d3-6/d3.min.js"></script>
+        <script src="https://cdn.bootcss.com/dom-to-image/2.6.0/dom-to-image.min.js"></script>
+        <script src="https://cdn.bootcss.com/FileSaver.js/2014-11-29/FileSaver.min.js"></script>
     </head>
     <body>
         <div class="container-lg">
@@ -56,6 +58,17 @@
                             <div class="itemName">After all data</div>
                         </div>
                     </div>
+                    <button id="downloadButton" onclick="download()">Download</button>
+                    <script type="text/javascript">
+			var node = document.getElementById('chuteContainer');
+			var btn = document.getElementById('downloadButton');
+			btn.onclick = function() {
+			  domtoimage.toBlob(document.getElementById('chuteContainer'))
+			    .then(function(blob) {
+			      window.saveAs(blob, 'chute.png');
+			    });
+			}
+		    </script>
                 </div>
                 <div id="footer">
                     <hr>
