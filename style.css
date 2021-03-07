@@ -111,6 +111,10 @@ body {
     background-color: var(--postDataPadding);
 }
 
+#downloadButton {
+    width: 100%;
+}
+
 #footer {
     grid-area: footer;
     /* margin-top: 16px; */
