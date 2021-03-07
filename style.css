@@ -41,6 +41,7 @@ body {
             "chute"
             "legend"
             "uiControls"
+            "downloadButton"
             "footer";
         grid-row-gap: 16px;
         row-gap: 16px;
@@ -109,6 +110,10 @@ body {
 }
 .colorSwatch.postDataPadding {
     background-color: var(--postDataPadding);
+}
+
+#downloadButtonContainer {
+    grid-area: downloadButton;
 }
 
 #downloadButton {

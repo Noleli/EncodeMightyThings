@@ -247,8 +247,7 @@ class UIControls {
         this.textboxNames = ["Inner ring", "Ring 2", "Ring 3", "Outer ring"];
         
         this.container.html(`<div class="textboxContainer"></div>
-            <div class="form-check"><label><input id="explainToggle" type="checkbox" class="form-check-input"> Explain</label></div>
-            <button id="downloadButton" class="btn btn-primary">Download</button>`);
+            <div class="form-check"><label><input id="explainToggle" type="checkbox" class="form-check-input"> Explain</label></div>`);
         
         this.legend = d3.select("#legend");
         
@@ -263,7 +262,10 @@ class UIControls {
         
         this.textboxContainer = this.container.select(".textboxContainer");
         
-        this.downloadButton = this.container.select("#downloadButton")
+        this.downloadButton = d3.select("#downloadButtonContainer").append("button")
+            .attr("class", "btn btn-primary")
+            .attr("id", "downloadButton")
+            .text("Download")
             .on("click", () => {
                 saveSvgAsPng(vis.svg.node(), "chute.png", { scale: 2 });
             });
