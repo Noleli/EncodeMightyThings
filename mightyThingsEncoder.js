@@ -48,7 +48,7 @@ class ChuteVisualizer {
     }
     
     updateData() {
-        this.data = strings.map((s, i) => encoder.encodePadded(i, s));
+        this.data = encoder.encodeAll(strings);
         this.update();
     }
     
@@ -317,14 +317,10 @@ class UIControls {
 class MightyThingsEncoder {
     constructor() {
         this.totalBits = 80;
-        
+        this.byteSize = 7;
         this.interByteGap = 3;
         this.interByteVal = false;
         this.padVal = true;
-        
-        // there are 4 rows of bits. each one has some amount of padding at the
-        // beginning. they are ordered from the center to the edge.
-        this.startBits = [1, 41, 21, 1];
         
         this.letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
         
@@ -385,7 +381,7 @@ class MightyThingsEncoder {
         }
         const binVal = numVal.toString(2).split("");
         
-        while(binVal.length < 7) {
+        while(binVal.length < this.byteSize) {
             binVal.splice(0, 0, "0");
         }
         
@@ -445,20 +441,39 @@ class MightyThingsEncoder {
         encoded = encoded.flat();
         
         // pad the end until there are 80 bits
-        encoded.push(...Array(this.totalBits - encoded.length).fill({
+        const unpaddedLength = encoded.length;
+        this.remainingBits = this.totalBits - unpaddedLength;
+        encoded.push(...Array(this.remainingBits).fill({
             role: "postDataPadding",
             value: this.padVal
         }));
        
         
-        // rotate the array so it starts on the right place based on the row
+        if(row === 0) {
+            this.startBit = 1;
+        }
+
         encoded = encoded.map((v, i, ar) => {
-            let shiftedIndex = (i - this.startBits[row]) % ar.length;
+            let shiftedIndex = (i - this.startBit) % ar.length;
             shiftedIndex += shiftedIndex < 0 ? ar.length : 0;
             return ar[shiftedIndex];
         });
         
+        // set up next start bit
+        if(unpaddedLength > 0) {
+            this.startBit = (this.startBit + (this.totalBits - this.remainingBits) - (unpaddedLength == this.totalBits ? 0: this.interByteGap)) % this.totalBits;
+        }
+        
         return encoded;
+    }
+    
+    encodeAll(stringArray) {
+        this.allOutArray = [];
+        stringArray.forEach((s, i) => {
+            const encoded = this.encodePadded(i, s);
+            this.allOutArray[i] = [encoded, this.remainingBits];
+        });
+        return this.allOutArray.map(a => a[0]);
     }
 }
 
