@@ -471,9 +471,9 @@ class MightyThingsEncoder {
         this.allOutArray = [];
         stringArray.forEach((s, i) => {
             const encoded = this.encodePadded(i, s);
-            this.allOutArray[i] = [encoded, this.remainingBits];
+            this.allOutArray[i] = encoded;
         });
-        return this.allOutArray.map(a => a[0]);
+        return this.allOutArray;
     }
 }
 
