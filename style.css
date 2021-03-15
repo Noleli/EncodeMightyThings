@@ -14,12 +14,12 @@ body {
         "chute sidebar"
         "footer footer";
     
-    --dataTrue: #d98855;
+    --dataTrue: #b32b2b;
     --dataFalse: #FFFFFF;
     --preWordPadding: #555555;
     --interBytePadding: #CCCCCC;
     --postWordPadding: #555555;
-    --postDataPadding: #882a2c;
+    --postDataPadding: #752325;
 }
 
 #sidebar {

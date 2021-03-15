@@ -6,10 +6,12 @@ class ChuteVisualizer {
         this.radialContainer = this.svg.append("g");
         this.parachute = this.radialContainer.append("g");
         this.explanatory = this.radialContainer.append("g");
+        
+        this.roundedEdgeProportion = 1/12; // proportion of radius to treat as radius for curved arc edges
         this.margin = 2;
         
         // inner and outer radius of each ring as a proportion of the total radius
-        this.ringProportions = [[0.09, 0.37], [0.37, 0.63], [0.63, 0.80], [0.90, 1]];
+        this.ringProportions = [[0.09, 0.37], [0.37, 0.63], [0.63, 0.84], [0.92, 1]];
         
         // not doing this in CSS so it's a legit exportable SVG
         this.colors = {
@@ -85,6 +87,7 @@ class ChuteVisualizer {
                         }
                     })
                     .attr("stroke-width", this.radius/600)
+                    .attr("stroke-linejoin", "round")
                     .attr("fill", d => {
                         if(explain) {
                             if(d.role == "data") {
@@ -187,7 +190,7 @@ class ChuteVisualizer {
             pathData += `L ${cartesianCorners[2].join(" ")}`;
         }
         else {
-            pathData += `A ${outerRadius} ${outerRadius} 0 0 1 ${cartesianCorners[2].join(" ")}`;
+            pathData += `A ${outerRadius * this.roundedEdgeProportion} ${outerRadius * this.roundedEdgeProportion} 0 0 1 ${cartesianCorners[2].join(" ")}`;
         }
         
         pathData += `L ${cartesianCorners[3]}`;
@@ -196,7 +199,7 @@ class ChuteVisualizer {
             pathData += "Z";
         }
         else {
-            pathData += `A ${innerRadius} ${innerRadius} 0 0 0 ${cartesianCorners[0].join(" ")}`;
+            pathData += `A ${innerRadius * this.roundedEdgeProportion} ${innerRadius * this.roundedEdgeProportion} 0 0 0 ${cartesianCorners[0].join(" ")}`;
         }
         
         return pathData;
@@ -226,7 +229,7 @@ class ChuteVisualizer {
         const availableHeight = this.windowHeight - 20;
                 
         this.outerRadius = Math.min(availableWidth, availableHeight)/2;
-        this.radius = this.outerRadius - this.margin;
+        this.radius = this.outerRadius - (this.outerRadius * this.roundedEdgeProportion/2) - this.margin;
         
         this.svg
             .attr("width", 2 * this.outerRadius)
